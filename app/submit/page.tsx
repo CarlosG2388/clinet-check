@@ -1,3 +1,55 @@
+// app/page.tsx
+"use client";
+import React from "react";
+import Link from "next/link";
+
+export default function Home() {
+  const [query, setQuery] = React.useState("");
+  const [message, setMessage] = React.useState("");
+
+  const handleSearch = () => {
+    setMessage(
+      !query.trim()
+        ? "Please enter a name, company, or address to search."
+        : `Searching for: "${query}"`
+    );
+  };
+
+  return (
+    <main className="p-8 max-w-2xl mx-auto text-center">
+      <h1 className="text-4xl font-bold mb-2">Client Check</h1>
+      <p className="text-sm text-gray-600 mb-4">Protect your labor</p>
+      <p className="text-lg mb-8">
+        Search for contractors or homeowners reported for non-payment.
+      </p>
+
+      <input
+        type="text"
+        placeholder="Search by name, company, or address"
+        className="w-full p-3 border rounded mb-4"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+
+      <button
+        onClick={handleSearch}
+        className="w-full bg-blue-600 text-white py-2 rounded mb-4"
+      >
+        Search
+      </button>
+
+      {message && <p className="mb-8 italic">{message}</p>}
+
+      <Link
+        href="/submit"
+        className="inline-block bg-green-600 text-white px-6 py-3 rounded"
+      >
+        Submit a Report
+      </Link>
+    </main>
+  );
+}
+
 // app/submit/page.tsx
 "use client";
 import React, { useState } from "react";
@@ -8,6 +60,8 @@ export default function SubmitReport() {
     name: "",
     address: "",
     amount: "",
+    phone: "",
+    email: "",
     description: "",
   });
   const [files, setFiles] = useState<File[]>([]);
@@ -24,13 +78,21 @@ export default function SubmitReport() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.address || !form.amount) {
-      setMsg({ type: "err", text: "Name, address, and amount are required." });
+    const { name, address, amount, phone } = form; // email is optional
+    if (!name || !address || !amount || !phone) {
+      setMsg({ type: "err", text: "Please fill in all required fields." });
       return;
     }
     console.log({ ...form, files }); // mock “save”
-    setMsg({ type: "ok", text: "Report submitted locally (console logged)." });
-    setForm({ name: "", address: "", amount: "", description: "" });
+    setMsg({ type: "ok", text: "Report submitted! (logged locally)" });
+    setForm({
+      name: "",
+      address: "",
+      amount: "",
+      phone: "",
+      email: "",
+      description: "",
+    });
     setFiles([]);
   };
 
@@ -39,13 +101,17 @@ export default function SubmitReport() {
       <h1 className="text-3xl font-bold mb-6 text-center">Submit a Report</h1>
 
       {msg && (
-        <p className={`mb-4 ${msg.type === "ok" ? "text-green-600" : "text-red-600"}`}>
+        <p
+          className={`mb-4 ${
+            msg.type === "ok" ? "text-green-600" : "text-red-600"
+          }`}
+        >
           {msg.text}
         </p>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* fields */}
+        {/* name / company */}
         <label className="block">
           <span className="font-medium">Client Name / Company</span>
           <input
@@ -57,6 +123,32 @@ export default function SubmitReport() {
           />
         </label>
 
+        {/* phone (required) */}
+        <label className="block">
+          <span className="font-medium">Phone Number</span>
+          <input
+            name="phone"
+            type="tel"
+            value={form.phone}
+            onChange={handleChange}
+            className="w-full p-3 border rounded mt-1"
+            required
+          />
+        </label>
+
+        {/* email (optional) */}
+        <label className="block">
+          <span className="font-medium">E-mail Address (optional)</span>
+          <input
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full p-3 border rounded mt-1"
+          />
+        </label>
+
+        {/* job address */}
         <label className="block">
           <span className="font-medium">Job Address</span>
           <input
@@ -68,6 +160,7 @@ export default function SubmitReport() {
           />
         </label>
 
+        {/* amount */}
         <label className="block">
           <span className="font-medium">Amount Owed (USD)</span>
           <input
@@ -82,6 +175,7 @@ export default function SubmitReport() {
           />
         </label>
 
+        {/* description */}
         <label className="block">
           <span className="font-medium">Description / What happened</span>
           <textarea
@@ -93,6 +187,7 @@ export default function SubmitReport() {
           />
         </label>
 
+        {/* proof upload */}
         <label className="block">
           <span className="font-medium">Upload Proof</span>
           <input
@@ -108,7 +203,10 @@ export default function SubmitReport() {
           )}
         </label>
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded"
+        >
           Submit Report
         </button>
       </form>
@@ -120,4 +218,4 @@ export default function SubmitReport() {
       </div>
     </main>
   );
-}   
+}
