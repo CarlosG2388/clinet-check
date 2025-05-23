@@ -78,12 +78,12 @@ export default function SubmitReport() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, address, amount, phone } = form; // email is optional
+    const { name, address, amount, phone } = form; // email optional
     if (!name || !address || !amount || !phone) {
       setMsg({ type: "err", text: "Please fill in all required fields." });
       return;
     }
-    console.log({ ...form, files }); // mock “save”
+    console.log({ ...form, files });
     setMsg({ type: "ok", text: "Report submitted! (logged locally)" });
     setForm({
       name: "",
@@ -111,7 +111,6 @@ export default function SubmitReport() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* name / company */}
         <label className="block">
           <span className="font-medium">Client Name / Company</span>
           <input
@@ -122,8 +121,6 @@ export default function SubmitReport() {
             required
           />
         </label>
-
-        {/* phone (required) */}
         <label className="block">
           <span className="font-medium">Phone Number</span>
           <input
@@ -135,8 +132,6 @@ export default function SubmitReport() {
             required
           />
         </label>
-
-        {/* email (optional) */}
         <label className="block">
           <span className="font-medium">E-mail Address (optional)</span>
           <input
@@ -147,8 +142,6 @@ export default function SubmitReport() {
             className="w-full p-3 border rounded mt-1"
           />
         </label>
-
-        {/* job address */}
         <label className="block">
           <span className="font-medium">Job Address</span>
           <input
@@ -159,8 +152,6 @@ export default function SubmitReport() {
             required
           />
         </label>
-
-        {/* amount */}
         <label className="block">
           <span className="font-medium">Amount Owed (USD)</span>
           <input
@@ -174,8 +165,6 @@ export default function SubmitReport() {
             required
           />
         </label>
-
-        {/* description */}
         <label className="block">
           <span className="font-medium">Description / What happened</span>
           <textarea
@@ -186,8 +175,6 @@ export default function SubmitReport() {
             rows={4}
           />
         </label>
-
-        {/* proof upload */}
         <label className="block">
           <span className="font-medium">Upload Proof</span>
           <input
@@ -202,11 +189,7 @@ export default function SubmitReport() {
             </p>
           )}
         </label>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded"
-        >
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
           Submit Report
         </button>
       </form>
