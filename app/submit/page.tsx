@@ -30,7 +30,7 @@ export default function SubmitReport() {
       setMsg({ type: "err", text: "Please fill in all required fields." });
       return;
     }
-    console.log({ ...form, files });
+    console.log({ ...form, files }); // mock save
     setMsg({ type: "ok", text: "Report submitted! (logged locally)" });
     setForm({
       name: "",
@@ -58,6 +58,7 @@ export default function SubmitReport() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* required fields */}
         <label className="block">
           <span className="font-medium">Client Name / Company</span>
           <input
@@ -68,6 +69,7 @@ export default function SubmitReport() {
             required
           />
         </label>
+
         <label className="block">
           <span className="font-medium">Phone Number</span>
           <input
@@ -79,6 +81,8 @@ export default function SubmitReport() {
             required
           />
         </label>
+
+        {/* optional email */}
         <label className="block">
           <span className="font-medium">E-mail Address (optional)</span>
           <input
@@ -89,6 +93,8 @@ export default function SubmitReport() {
             className="w-full p-3 border rounded mt-1"
           />
         </label>
+
+        {/* other required fields */}
         <label className="block">
           <span className="font-medium">Job Address</span>
           <input
@@ -99,6 +105,7 @@ export default function SubmitReport() {
             required
           />
         </label>
+
         <label className="block">
           <span className="font-medium">Amount Owed (USD)</span>
           <input
@@ -112,6 +119,7 @@ export default function SubmitReport() {
             required
           />
         </label>
+
         <label className="block">
           <span className="font-medium">Description / What happened</span>
           <textarea
@@ -122,6 +130,7 @@ export default function SubmitReport() {
             rows={4}
           />
         </label>
+
         <label className="block">
           <span className="font-medium">Upload Proof</span>
           <input
@@ -136,7 +145,11 @@ export default function SubmitReport() {
             </p>
           )}
         </label>
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded"
+        >
           Submit Report
         </button>
       </form>
@@ -147,6 +160,5 @@ export default function SubmitReport() {
         </Link>
       </div>
     </main>
-    fix: move "use client" directive to first line
   );
 }
