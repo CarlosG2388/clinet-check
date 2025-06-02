@@ -9,7 +9,7 @@ export default function SubmitReport() {
     amount: "",
     phone: "",
     email: "",
-    description: "",
+    description: "", 
   });
   const [files, setFiles] = useState<File[]>([]);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(
