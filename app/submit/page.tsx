@@ -147,5 +147,6 @@ export default function SubmitReport() {
         </Link>
       </div>
     </main>
+    fix: move "use client" directive to first line
   );
 }
