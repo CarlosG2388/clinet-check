@@ -1,10 +1,10 @@
 import { sql } from "@vercel/postgres";
 
-// Run once: create table if it doesn't exist
+/* 1️⃣  runs once on first import – creates table if absent */
 await sql`
   CREATE TABLE IF NOT EXISTS reports (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at  TIMESTAMPTZ     DEFAULT now(),
     name        TEXT  NOT NULL,
     phone       TEXT  NOT NULL,
     email       TEXT,
@@ -15,8 +15,10 @@ await sql`
   );
 `;
 
-// Insert a new report
-export const insertReport = async (r: {
+const toNull = (v: any) => (v === undefined ? null : v);
+
+/* 2️⃣  insert helper */
+export async function insertReport(r: {
   name: string;
   phone: string;
   email?: string;
@@ -24,19 +26,28 @@ export const insertReport = async (r: {
   amount: number;
   description?: string;
   proof_urls?: any;
-}) => {
+}) {
   await sql`
     INSERT INTO reports (name, phone, email, address, amount, description, proof_urls)
-    VALUES (${r.name}, ${r.phone}, ${r.email}, ${r.address}, ${r.amount}, ${r.description}, ${r.proof_urls})
+    VALUES (
+      ${r.name},
+      ${r.phone},
+      ${toNull(r.email)},
+      ${r.address},
+      ${r.amount},
+      ${toNull(r.description)},
+      ${toNull(r.proof_urls)}
+    );
   `;
-};
+}
 
-// Search reports by name or address
-export const searchReports = async (q: string) =>
-  sql`
+/* 3️⃣  search helper */
+export async function searchReports(q: string) {
+  return sql`
     SELECT * FROM reports
     WHERE lower(name)    LIKE ${"%" + q.toLowerCase() + "%"}
        OR lower(address) LIKE ${"%" + q.toLowerCase() + "%"}
     ORDER BY created_at DESC
     LIMIT 50;
   `;
+}
