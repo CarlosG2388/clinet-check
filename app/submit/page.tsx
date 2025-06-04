@@ -1,3 +1,79 @@
+// app/page.tsx
+"use client";
+import React from "react";
+import Link from "next/link";
+
+export default function Home() {
+  const [query, setQuery] = React.useState("");
+  const [message, setMessage] = React.useState("");
+  const [results, setResults] = React.useState<any[]>([]);
+
+  const handleSearch = async () => {
+    if (!query.trim()) {
+      setMessage("Please enter a name, company, or address to search.");
+      setResults([]);
+      return;
+    }
+    setMessage("Searching…");
+    try {
+      const res = await fetch(`/api/reports?q=${encodeURIComponent(query)}`);
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
+      setResults(data);
+      setMessage(data.length ? "" : "No reports found.");
+    } catch (err) {
+      setMessage("Error fetching reports. Try again later.");
+    }
+  };
+
+  return (
+    <main className="p-8 max-w-2xl mx-auto text-center">
+      <h1 className="text-4xl font-bold mb-2">Client Check</h1>
+      <p className="text-sm text-gray-600 mb-4">Protect your labor</p>
+      <p className="text-lg mb-8">
+        Search for contractors or homeowners reported for non-payment.
+      </p>
+
+      <input
+        type="text"
+        placeholder="Search by name, company, or address"
+        className="w-full p-3 border rounded mb-4"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+
+      <button
+        onClick={handleSearch}
+        className="w-full bg-blue-600 text-white py-2 rounded mb-6"
+      >
+        Search
+      </button>
+
+      {message && <p className="mb-6 italic text-gray-700">{message}</p>}
+
+      {results.length > 0 && (
+        <ul className="space-y-4 text-left">
+          {results.map((r) => (
+            <li key={r.id} className="border rounded p-4">
+              <p className="font-bold text-lg">{r.name}</p>
+              <p className="text-sm text-gray-600">{r.address}</p>
+              <p className="text-sm">Owes ${r.amount}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Link
+        href="/submit"
+        className="inline-block bg-green-600 text-white px-6 py-3 rounded mt-8"
+      >
+        Submit a Report
+      </Link>
+    </main>
+  );
+}
+
+// app/submit/page.tsx
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
@@ -23,20 +99,19 @@ export default function SubmitReport() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) =>
     e.target.files && setFiles(Array.from(e.target.files));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, address, amount, phone } = form; // email optional
+    const { name, address, amount, phone } = form;
     if (!name || !address || !amount || !phone) {
       setMsg({ type: "err", text: "Please fill in all required fields." });
       return;
     }
     await fetch("/api/reports", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ ...form, amount: Number(form.amount) }),
-});
-setMsg({ type: "ok", text: "Report submitted!" });
-    setMsg({ type: "ok", text: "Report submitted! (logged locally)" });
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...form, amount: Number(amount) }),
+    });
+    setMsg({ type: "ok", text: "Report submitted!" });
     setForm({
       name: "",
       address: "",
@@ -63,7 +138,6 @@ setMsg({ type: "ok", text: "Report submitted!" });
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* required fields */}
         <label className="block">
           <span className="font-medium">Client Name / Company</span>
           <input
@@ -74,7 +148,6 @@ setMsg({ type: "ok", text: "Report submitted!" });
             required
           />
         </label>
-
         <label className="block">
           <span className="font-medium">Phone Number</span>
           <input
@@ -86,8 +159,6 @@ setMsg({ type: "ok", text: "Report submitted!" });
             required
           />
         </label>
-
-        {/* optional email */}
         <label className="block">
           <span className="font-medium">E-mail Address (optional)</span>
           <input
@@ -98,8 +169,6 @@ setMsg({ type: "ok", text: "Report submitted!" });
             className="w-full p-3 border rounded mt-1"
           />
         </label>
-
-        {/* other required fields */}
         <label className="block">
           <span className="font-medium">Job Address</span>
           <input
@@ -110,7 +179,6 @@ setMsg({ type: "ok", text: "Report submitted!" });
             required
           />
         </label>
-
         <label className="block">
           <span className="font-medium">Amount Owed (USD)</span>
           <input
@@ -124,7 +192,6 @@ setMsg({ type: "ok", text: "Report submitted!" });
             required
           />
         </label>
-
         <label className="block">
           <span className="font-medium">Description / What happened</span>
           <textarea
@@ -135,7 +202,6 @@ setMsg({ type: "ok", text: "Report submitted!" });
             rows={4}
           />
         </label>
-
         <label className="block">
           <span className="font-medium">Upload Proof</span>
           <input
@@ -144,17 +210,8 @@ setMsg({ type: "ok", text: "Report submitted!" });
             onChange={handleFile}
             className="w-full mt-1"
           />
-          {files.length > 0 && (
-            <p className="text-sm text-gray-600 mt-1">
-              {files.length} file(s) selected
-            </p>
-          )}
         </label>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded"
-        >
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
           Submit Report
         </button>
       </form>
