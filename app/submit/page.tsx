@@ -30,7 +30,12 @@ export default function SubmitReport() {
       setMsg({ type: "err", text: "Please fill in all required fields." });
       return;
     }
-    console.log({ ...form, files }); // mock save
+    await fetch("/api/reports", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ ...form, amount: Number(form.amount) }),
+});
+setMsg({ type: "ok", text: "Report submitted!" });
     setMsg({ type: "ok", text: "Report submitted! (logged locally)" });
     setForm({
       name: "",
