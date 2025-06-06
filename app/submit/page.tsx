@@ -15,14 +15,16 @@ export default function Home() {
     }
     setMessage("Searching…");
     try {
-      const res = await fetch(`/api/reports?q=${encodeURIComponent(query)}`);
-      if (!res.ok) throw new Error("API error");
-      const data = await res.json();
-      setResults(data);
-      setMessage(data.length ? "" : "No reports found.");
-    } catch (err) {
-      setMessage("Error fetching reports. Try again later.");
-    }
+  const res = await fetch("/api/reports", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...form, amount: Number(form.amount) }),
+  });
+  if (!res.ok) throw new Error("Server error");
+  setMsg({ type: "ok", text: "Report saved on server!" });
+} catch (err) {
+  setMsg({ type: "err", text: "Submit failed – try again." });
+}
   };
 
   return (
