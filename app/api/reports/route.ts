@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { insertReport, searchReports } from "@/lib/db";
+import { insertReport, searchReports } from "../../../lib/db";
 
 /* GET /api/reports?q=abc  -> array of rows */
 export async function GET(req: NextRequest) {
