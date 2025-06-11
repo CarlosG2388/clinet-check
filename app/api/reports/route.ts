@@ -1,3 +1,5 @@
+// app/api/reports/route.ts
+import { NextRequest, NextResponse } from "next/server";   // ← ADD THIS LINE
 import { insertReport, searchReports } from "../../../lib/db";
 
 // GET /api/reports?q=foo
