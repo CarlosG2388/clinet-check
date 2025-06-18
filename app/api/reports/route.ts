@@ -1,7 +1,6 @@
 // app/api/reports/route.ts
-import { NextRequest, NextResponse } from "next/server";   // ← ADD THIS LINE
-import { insertReport, searchReports } from "../../../lib/db";
-
+-import { insertReport, searchReports } from "@/lib/db";
++import { insertReport, searchReports } from "@/lib/db";
 // GET /api/reports?q=foo
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q") ?? "";

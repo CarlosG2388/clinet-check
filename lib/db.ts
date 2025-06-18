@@ -1,46 +1,63 @@
-import { sql } from "@vercel/postgres";
+import { Pool } from "pg";
 
-// 1️⃣ run once per cold-start, but only when called
-let schemaReady: Promise<void> | null = null;
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL, // Supabase direct URL
+  ssl: { rejectUnauthorized: false },         // Supabase requires TLS
+});
 
+/** Ensures the reports table exists (runs only on first call). */
 async function ensureSchema() {
-  if (!schemaReady) {
-    schemaReady = (async () => {
-      await sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`;
-      await sql`
-        CREATE TABLE IF NOT EXISTS reports (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          created_at TIMESTAMPTZ DEFAULT now(),
-          name TEXT NOT NULL,
-          phone TEXT NOT NULL,
-          email TEXT,
-          address TEXT NOT NULL,
-          amount NUMERIC NOT NULL,
-          description TEXT,
-          proof_urls JSONB
-        );
-      `;
-    })();
-  }
-  return schemaReady;
+  await pool.query(`
+    create extension if not exists "uuid-ossp";
+
+    create table if not exists reports (
+      id          uuid primary key default uuid_generate_v4(),
+      name        text,
+      address     text,
+      amount      numeric,
+      phone       text,
+      email       text,
+      description text,
+      created_at  timestamptz default now()
+    );
+  `);
 }
 
-export async function insertReport(r: any) {
+/** INSERT one report and return the row. */
+export async function insertReport(report: {
+  name: string;
+  address: string;
+  amount: number;
+  phone: string;
+  email?: string;
+  description?: string;
+}) {
   await ensureSchema();
-  await sql`
-    INSERT INTO reports (name, phone, email, address, amount, description, proof_urls)
-    VALUES (${r.name}, ${r.phone}, ${r.email}, ${r.address}, ${r.amount},
-            ${r.description}, ${r.proof_urls});
-  `;
+  const { rows } = await pool.query(
+    `insert into reports (name,address,amount,phone,email,description)
+     values ($1,$2,$3,$4,$5,$6) returning *`,
+    [
+      report.name,
+      report.address,
+      report.amount,
+      report.phone,
+      report.email ?? null,
+      report.description ?? null,
+    ],
+  );
+  return rows[0];
 }
 
+/** Simple case-insensitive search by name / address. */
 export async function searchReports(q: string) {
   await ensureSchema();
-  return sql`
-    SELECT * FROM reports
-    WHERE lower(name) LIKE ${"%" + q.toLowerCase() + "%"}
-       OR lower(address) LIKE ${"%" + q.toLowerCase() + "%"}
-    ORDER BY created_at DESC
-    LIMIT 50;
-  `;
+  const { rows } = await pool.query(
+    `select * from reports
+     where name    ilike '%'||$1||'%'
+        or address ilike '%'||$1||'%'
+     order by created_at desc
+     limit 50`,
+    [q],
+  );
+  return rows;
 }
