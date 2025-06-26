@@ -122,7 +122,10 @@ export default function SubmitReport() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data?.error?.message || "Server error");
+        // If Supabase returns an error object, show its message; otherwise stringify.
+        const errMsg =
+          data?.error?.message || data?.message || JSON.stringify(data);
+        throw new Error(errMsg);
       }
 
       setMsg({ type: "ok", text: "Report submitted!" });
@@ -157,6 +160,7 @@ export default function SubmitReport() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Client Name */}
         <label className="block">
           <span className="font-medium">Client Name / Company</span>
           <input
@@ -167,6 +171,8 @@ export default function SubmitReport() {
             required
           />
         </label>
+
+        {/* Phone */}
         <label className="block">
           <span className="font-medium">Phone Number</span>
           <input
@@ -178,6 +184,8 @@ export default function SubmitReport() {
             required
           />
         </label>
+
+        {/* Email */}
         <label className="block">
           <span className="font-medium">E-mail Address (optional)</span>
           <input
@@ -188,6 +196,8 @@ export default function SubmitReport() {
             className="w-full p-3 border rounded mt-1"
           />
         </label>
+
+        {/* Address */}
         <label className="block">
           <span className="font-medium">Job Address</span>
           <input
@@ -198,6 +208,8 @@ export default function SubmitReport() {
             required
           />
         </label>
+
+        {/* Amount */}
         <label className="block">
           <span className="font-medium">Amount Owed (USD)</span>
           <input
@@ -211,6 +223,8 @@ export default function SubmitReport() {
             required
           />
         </label>
+
+        {/* Description */}
         <label className="block">
           <span className="font-medium">Description / What happened</span>
           <textarea
@@ -221,15 +235,21 @@ export default function SubmitReport() {
             rows={4}
           />
         </label>
+
+        {/* Files */}
         <label className="block">
-          <span className="font-medium">Upload Proof</span>
+          <span className="font-medium">Upload Proof (optional)</span>
           <input
             type="file"
             multiple
             onChange={handleFile}
             className="w-full mt-1"
           />
+          {files.length > 0 && (
+            <p className="text-sm text-gray-500 mt-1">{files.length} file(s) selected</p>
+          )}
         </label>
+
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
